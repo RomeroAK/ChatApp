@@ -1,8 +1,9 @@
-package org.chatapp.service;
+package org.chatapp.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.chatapp.model.AuthenticationRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -41,9 +42,9 @@ public class JwtUtil {
     }
 
     // Generate a new JWT token for a given user
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername());
+        return createToken(claims, username);
     }
 
     // Create the token with claims and subject

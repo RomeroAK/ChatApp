@@ -1,4 +1,4 @@
-package org.chatapp.config;
+package org.chatapp.websocket;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

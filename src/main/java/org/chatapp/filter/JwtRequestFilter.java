@@ -1,4 +1,4 @@
-package org.chatapp.config;
+package org.chatapp.filter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +16,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import org.chatapp.service.JwtUtil;
+import org.chatapp.util.JwtUtil;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {

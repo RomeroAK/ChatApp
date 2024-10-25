@@ -1,8 +1,10 @@
 package org.chatapp.controller;
 
 
+import org.chatapp.model.AuthenticationRequest;
+import org.chatapp.model.AuthenticationResponse;
 import org.chatapp.model.User;
-import org.chatapp.service.JwtUtil;
+import org.chatapp.util.JwtUtil;
 import org.chatapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -50,15 +52,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody User user) {
+    public ResponseEntity<?> authenticateUser(@RequestBody AuthenticationRequest authRequest) {
         Authentication auth = am.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+                new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(auth);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
 
-        String jwt = jwtUtil.generateToken(userDetails);
+        String jwt = jwtUtil.generateToken(authRequest.getUsername());
 
-        return ResponseEntity.ok(jwt);
+        return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
 }

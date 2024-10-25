@@ -1,5 +1,6 @@
 package org.chatapp.config;
 
+import org.chatapp.filter.JwtRequestFilter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -47,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfiguration {
     protected void configure(@NotNull HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/authenticate").permitAll()  // Allow authentication without JWT
+                        .requestMatchers("/auth/login", "/auth/register").permitAll()  // Allow authentication without JWT
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
