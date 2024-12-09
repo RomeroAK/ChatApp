@@ -6,14 +6,11 @@ import org.chatapp.repository.UserRepository;
 import org.chatapp.service.ChatMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 
-import java.util.Date;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +18,7 @@ import java.util.Optional;
 @RequestMapping("/chat")
 public class ChatController {
 
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
