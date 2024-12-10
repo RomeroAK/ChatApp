@@ -1,14 +1,15 @@
 package org.chatapp.filter;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import io.jsonwebtoken.ExpiredJwtException;
+
 
 
 import jakarta.servlet.FilterChain;
@@ -28,40 +29,51 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-
         final String authorizationHeader = request.getHeader("Authorization");
 
         String username = null;
         String jwt = null;
 
+        // Extract JWT token from Authorization header
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            jwt = authorizationHeader.substring(7); // Extract JWT token from the "Bearer" string
-            try {
-                username = jwtUtil.extractUsername(jwt); // Extract username from the token
-            } catch (ExpiredJwtException e) {
-                System.out.println("JWT Token has expired");
-            }
+            jwt = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            username = extractUsernameFromToken(jwt);
         }
 
-        // If we have a username and SecurityContext is not set, validate the token
+        // Authenticate the user if token is valid and user is not yet authenticated
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            // Validate the token
-            if (jwtUtil.validateToken(jwt, userDetails.getUsername())) {
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+            if (validateToken(jwt, userDetails)) {
+                UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                usernamePasswordAuthenticationToken
-                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // Set the authentication in the security context
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                authenticationToken.setDetails(new org.springframework.security.web.authentication.WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         }
-        // Pass the request down the filter chain
-        chain.doFilter(request, response);
+
+        // Proceed with the next filter in the chain
+        filterChain.doFilter(request, response);
+    }
+
+    private String extractUsernameFromToken(String token) {
+        try {
+            Claims claim = Jwts.parser()
+                    .setSigningKey("your-secret-key")
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return claim.getSubject();
+        } catch (Exception e) {
+            return null; // Token invalid or parsing failed
+        }
+    }
+
+    private boolean validateToken(String token, UserDetails userDetails) {
+        String username = extractUsernameFromToken(token);
+        return username != null && username.equals(userDetails.getUsername());
     }
 }
 

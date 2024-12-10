@@ -27,8 +27,8 @@ public class ChatController {
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/send")
     public ResponseEntity<ChatMessage> sendMessage(@RequestBody ChatMessage message) {
-        Optional<User> receiver = userRepository.findByUsername(message.getRecipient());
-        if (receiver.isPresent()) {
+        User receiver = userRepository.findByUsername(message.getRecipient());
+        if (receiver != null) {
             ChatMessage savedMessage = chatMessageService.saveMessage(message);
             return ResponseEntity.ok(savedMessage);
         }
@@ -37,9 +37,9 @@ public class ChatController {
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @GetMapping("/messages")
-    public ResponseEntity<List<ChatMessage>> getMessages() {
+    public List<ChatMessage> getMessages() {
         List<ChatMessage> messages = chatMessageService.getAllMessages();
-        return ResponseEntity.ok(messages);
+        return messages;
     }
 
 

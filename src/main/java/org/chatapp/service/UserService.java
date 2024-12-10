@@ -23,7 +23,16 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Optional<User> findUserByUsername(String username) {
+    public User findUserByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    public boolean validateLogin(String username, String password){
+        User user = userRepository.findByUsername(username);
+        if(user != null){
+            return passwordEncoder.matches(password,user.getPassword());
+        }
+
+        return false;
     }
 }
